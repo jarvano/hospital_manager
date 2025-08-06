@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Register New User
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('auth.register') }}" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.first_name(class="form-control", placeholder="First Name", required=true) }}
+                                    {{ form.first_name.label }}
+                                    <div class="invalid-feedback">
+                                        Please enter the first name.
+                                    </div>
+                                </div>
+                                {% for error in form.first_name.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.last_name(class="form-control", placeholder="Last Name", required=true) }}
+                                    {{ form.last_name.label }}
+                                    <div class="invalid-feedback">
+                                        Please enter the last name.
+                                    </div>
+                                </div>
+                                {% for error in form.last_name.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.email(class="form-control", placeholder="Email", required=true) }}
+                                    {{ form.email.label }}
+                                    <div class="invalid-feedback">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
+                                {% for error in form.email.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.role(class="form-select", required=true) }}
+                                    {{ form.role.label }}
+                                    <div class="invalid-feedback">
+                                        Please select a role.
+                                    </div>
+                                </div>
+                                {% for error in form.role.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.password(class="form-control", placeholder="Password", required=true) }}
+                                    {{ form.password.label }}
+                                    <div class="invalid-feedback">
+                                        Please enter a password.
+                                    </div>
+                                </div>
+                                {% for error in form.password.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.password2(class="form-control", placeholder="Confirm Password", required=true) }}
+                                    {{ form.password2.label }}
+                                    <div class="invalid-feedback">
+                                        Please confirm the password.
+                                    </div>
+                                </div>
+                                {% for error in form.password2.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.phone(class="form-control", placeholder="Phone Number") }}
+                                    {{ form.phone.label }}
+                                </div>
+                                {% for error in form.phone.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    {{ form.department(class="form-select") }}
+                                    {{ form.department.label }}
+                                </div>
+                                {% for error in form.department.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                {{ form.address(class="form-control", placeholder="Address", style="height: 100px") }}
+                                {{ form.address.label }}
+                            </div>
+                            {% for error in form.address.errors %}
+                                <small class="text-danger">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Users
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Register User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Password strength indicator
+    document.addEventListener('DOMContentLoaded', function() {
+        const password = document.getElementById('password');
+        const strengthMeter = document.createElement('div');
+        strengthMeter.className = 'progress mt-2';
+        strengthMeter.innerHTML = '<div class="progress-bar" role="progressbar" style="width: 0%"></div>';
+        password.parentElement.appendChild(strengthMeter);
+
+        password.addEventListener('input', function() {
+            const strength = calculatePasswordStrength(this.value);
+            const progressBar = strengthMeter.querySelector('.progress-bar');
+            progressBar.style.width = strength + '%';
+            if (strength < 33) {
+                progressBar.className = 'progress-bar bg-danger';
+            } else if (strength < 66) {
+                progressBar.className = 'progress-bar bg-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+            }
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength += 25;
+            if (password.match(/[a-z]/)) strength += 25;
+            if (password.match(/[A-Z]/)) strength += 25;
+            if (password.match(/[0-9]/)) strength += 25;
+            return strength;
+        }
+    });
+
+    // Role-specific fields toggle
+    const roleSelect = document.getElementById('role');
+    const departmentGroup = document.getElementById('department').closest('.col-md-6');
+
+    roleSelect.addEventListener('change', function() {
+        if (this.value === 'doctor') {
+            departmentGroup.style.display = 'block';
+        } else {
+            departmentGroup.style.display = 'none';
+        }
+    });
+
+    // Trigger initial state
+    roleSelect.dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

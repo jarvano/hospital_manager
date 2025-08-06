@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="card-title mb-0">Welcome, {{ current_user.first_name }}!</h2>
+                    <p class="card-text">{{ stats.pending_tests }} tests awaiting processing</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tests Today</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-tests-today">{{ stats.tests_today }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-flask fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Tests</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-pending-tests">{{ stats.pending_tests }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Completed Today</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-completed-today">{{ stats.completed_today }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Critical Results</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-critical-results">{{ stats.critical_results }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Tests -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Pending Tests</h5>
+                    <a href="{{ url_for('laboratory.tests', status='pending') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="pending-tests-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Test Type</th>
+                                    <th>Priority</th>
+                                    <th>Requested</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in pending_tests %}
+                                <tr>
+                                    <td>{{ test.patient.first_name }} {{ test.patient.last_name }}</td>
+                                    <td>{{ test.test_type }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if test.priority == 'urgent' else 'warning' if test.priority == 'high' else 'info' }}">
+                                            {{ test.priority }}
+                                        </span>
+                                    </td>
+                                    <td>{{ test.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('laboratory.process_test', id=test.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            Process
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No pending tests.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Results -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Results</h5>
+                    <a href="{{ url_for('laboratory.tests', status='completed') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for test in recent_results %}
+                        <a href="{{ url_for('laboratory.view_test', id=test.id) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ test.patient.first_name }} {{ test.patient.last_name }}</h6>
+                                <small>{{ test.completed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ test.test_type }}</p>
+                            <small class="text-{{ 'danger' if test.is_critical else 'success' }}">
+                                {{ 'Critical Result' if test.is_critical else 'Normal Result' }}
+                            </small>
+                        </a>
+                        {% else %}
+                        <div class="text-center py-3">No recent test results.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshDashboard() {
+    fetch('{{ url_for("laboratory.dashboard_data") }}')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics
+            document.getElementById('stats-tests-today').textContent = data.stats.tests_today;
+            document.getElementById('stats-pending-tests').textContent = data.stats.pending_tests;
+            document.getElementById('stats-completed-today').textContent = data.stats.completed_today;
+            document.getElementById('stats-critical-results').textContent = data.stats.critical_results;
+
+            // Update pending tests table
+            const pendingTestsTbody = document.querySelector('#pending-tests-table tbody');
+            if (data.pending_tests.length > 0) {
+                pendingTestsTbody.innerHTML = data.pending_tests.map(test => `
+                    <tr>
+                        <td>${test.patient_name}</td>
+                        <td>${test.test_type}</td>
+                        <td>
+                            <span class="badge bg-${test.priority === 'urgent' ? 'danger' : test.priority === 'high' ? 'warning' : 'info'}">
+                                ${test.priority}
+                            </span>
+                        </td>
+                        <td>${test.created_at}</td>
+                        <td>
+                            <a href="/laboratory/test/${test.id}/process" 
+                               class="btn btn-sm btn-primary">
+                                Process
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                pendingTestsTbody.innerHTML = '<tr><td colspan="5" class="text-center">No pending tests.</td></tr>';
+            }
+
+            // Update recent results
+            const resultsList = document.querySelector('.list-group');
+            if (data.recent_results.length > 0) {
+                resultsList.innerHTML = data.recent_results.map(test => `
+                    <a href="/laboratory/test/${test.id}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${test.patient_name}</h6>
+                            <small>${test.completed_at}</small>
+                        </div>
+                        <p class="mb-1">${test.test_type}</p>
+                        <small class="text-${test.is_critical ? 'danger' : 'success'}">
+                            ${test.is_critical ? 'Critical Result' : 'Normal Result'}
+                        </small>
+                    </a>
+                `).join('');
+            } else {
+                resultsList.innerHTML = '<div class="text-center py-3">No recent test results.</div>';
+            }
+        })
+        .catch(error => console.error('Error refreshing dashboard:', error));
+}
+
+// Initial load
+refreshDashboard();
+
+// Refresh every 30 seconds
+setInterval(refreshDashboard, 30000);
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="card-title mb-0">Welcome, {{ current_user.first_name }}!</h2>
+                    <p class="card-text">{{ stats.low_stock_count }} medications need restocking</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Medications</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-total-medications">{{ stats.total_medications }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-pills fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Prescriptions Today</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-prescriptions-today">{{ stats.prescriptions_today }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-prescription fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Low Stock Items</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-low-stock">{{ stats.low_stock_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Dispensed Today</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-dispensed-today">{{ stats.dispensed_today }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hand-holding-medical fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Low Stock Medications -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Low Stock Medications</h5>
+                    <a href="{{ url_for('pharmacy.medications') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="low-stock-table">
+                            <thead>
+                                <tr>
+                                    <th>Medication</th>
+                                    <th>Current Stock</th>
+                                    <th>Reorder Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for med in low_stock_medications %}
+                                <tr>
+                                    <td>{{ med.name }}</td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ med.current_stock }}</span>
+                                    </td>
+                                    <td>{{ med.reorder_level }}</td>
+                                    <td>
+                                        <a href="{{ url_for('pharmacy.update_stock', id=med.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            Update Stock
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No medications are low in stock.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Prescriptions -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Prescriptions</h5>
+                    <a href="{{ url_for('pharmacy.prescriptions') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for prescription in recent_prescriptions %}
+                        <a href="{{ url_for('pharmacy.view_prescription', id=prescription.id) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ prescription.patient.first_name }} {{ prescription.patient.last_name }}</h6>
+                                <small>{{ prescription.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">Prescribed by: Dr. {{ prescription.doctor.first_name }} {{ prescription.doctor.last_name }}</p>
+                            <small class="text-{{ 'success' if prescription.is_dispensed else 'warning' }}">
+                                {{ 'Dispensed' if prescription.is_dispensed else 'Pending' }}
+                            </small>
+                        </a>
+                        {% else %}
+                        <div class="text-center py-3">No recent prescriptions.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshDashboard() {
+    fetch('{{ url_for("pharmacy.dashboard_data") }}')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics
+            document.getElementById('stats-total-medications').textContent = data.stats.total_medications;
+            document.getElementById('stats-prescriptions-today').textContent = data.stats.prescriptions_today;
+            document.getElementById('stats-low-stock').textContent = data.stats.low_stock_count;
+            document.getElementById('stats-dispensed-today').textContent = data.stats.dispensed_today;
+
+            // Update low stock table
+            const lowStockTbody = document.querySelector('#low-stock-table tbody');
+            if (data.low_stock_medications.length > 0) {
+                lowStockTbody.innerHTML = data.low_stock_medications.map(med => `
+                    <tr>
+                        <td>${med.name}</td>
+                        <td><span class="badge bg-danger">${med.current_stock}</span></td>
+                        <td>${med.reorder_level}</td>
+                        <td>
+                            <a href="/pharmacy/stock/${med.id}/update" 
+                               class="btn btn-sm btn-primary">
+                                Update Stock
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                lowStockTbody.innerHTML = '<tr><td colspan="4" class="text-center">No medications are low in stock.</td></tr>';
+            }
+
+            // Update recent prescriptions
+            const prescriptionsList = document.querySelector('.list-group');
+            if (data.recent_prescriptions.length > 0) {
+                prescriptionsList.innerHTML = data.recent_prescriptions.map(rx => `
+                    <a href="/pharmacy/prescription/${rx.id}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${rx.patient_name}</h6>
+                            <small>${rx.created_at}</small>
+                        </div>
+                        <p class="mb-1">Prescribed by: Dr. ${rx.doctor_name}</p>
+                        <small class="text-${rx.is_dispensed ? 'success' : 'warning'}">
+                            ${rx.is_dispensed ? 'Dispensed' : 'Pending'}
+                        </small>
+                    </a>
+                `).join('');
+            } else {
+                prescriptionsList.innerHTML = '<div class="text-center py-3">No recent prescriptions.</div>';
+            }
+        })
+        .catch(error => console.error('Error refreshing dashboard:', error));
+}
+
+// Initial load
+refreshDashboard();
+
+// Refresh every 30 seconds
+setInterval(refreshDashboard, 30000);
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-hospital-alt fa-3x text-primary mb-3"></i>
+                    <h2 class="font-weight-bold">Welcome Back</h2>
+                    <p class="text-muted">Please sign in to continue</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.login') }}" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            {{ form.email(class="form-control", placeholder="name@example.com", required=true) }}
+                            {{ form.email.label }}
+                            <div class="invalid-feedback">
+                                Please enter a valid email address.
+                            </div>
+                        </div>
+                        {% for error in form.email.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-floating">
+                            {{ form.password(class="form-control", placeholder="Password", required=true) }}
+                            {{ form.password.label }}
+                            <div class="invalid-feedback">
+                                Please enter your password.
+                            </div>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                            {{ form.remember_me(class="form-check-input") }}
+                            {{ form.remember_me.label(class="form-check-label") }}
+                        </div>
+                        <a href="{{ url_for('auth.reset_password_request') }}" class="text-primary text-decoration-none">
+                            Forgot Password?
+                        </a>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if config['DEMO_MODE'] %}
+        <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Demo Accounts</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Admin</td>
+                                <td>admin@example.com</td>
+                                <td>admin123</td>
+                            </tr>
+                            <tr>
+                                <td>Doctor</td>
+                                <td>doctor@example.com</td>
+                                <td>doctor123</td>
+                            </tr>
+                            <tr>
+                                <td>Receptionist</td>
+                                <td>receptionist@example.com</td>
+                                <td>reception123</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Show/hide password toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.createElement('button');
+        togglePassword.type = 'button';
+        togglePassword.className = 'btn btn-outline-secondary position-absolute end-0 top-50 translate-middle-y';
+        togglePassword.innerHTML = '<i class="fas fa-eye"></i>';
+        togglePassword.style.right = '1rem';
+        togglePassword.onclick = function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        };
+        passwordInput.parentElement.style.position = 'relative';
+        passwordInput.parentElement.appendChild(togglePassword);
+    });
+</script>
+{% endblock %}

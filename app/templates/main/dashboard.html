@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h2 class="mb-1">Welcome, {{ current_user.first_name }}!</h2>
+                            <p class="mb-0">{{ current_user.role.capitalize() }} Dashboard</p>
+                        </div>
+                        <div class="ms-auto">
+                            <i class="fas fa-user-md fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        {% if current_user.role == 'admin' %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-primary bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Total Patients</h6>
+                            <h2 class="mb-0">{{ stats.total_patients }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.role in ['admin', 'doctor', 'receptionist'] %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-success bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Today's Appointments</h6>
+                            <h2 class="mb-0">{{ stats.today_appointments }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.role == 'pharmacist' %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-warning bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Low Stock Items</h6>
+                            <h2 class="mb-0">{{ stats.low_stock_items }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-pills fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.role == 'lab_technician' %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-info bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Pending Tests</h6>
+                            <h2 class="mb-0">{{ stats.pending_tests }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-flask fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if current_user.role in ['admin', 'receptionist'] %}
+                        <div class="col-md-3">
+                            <a href="{{ url_for('main.register_patient') }}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="fas fa-user-plus mb-2 fa-2x"></i>
+                                <div>Register Patient</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('main.schedule_appointment') }}" class="btn btn-outline-success w-100 p-3">
+                                <i class="fas fa-calendar-plus mb-2 fa-2x"></i>
+                                <div>Schedule Appointment</div>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role == 'doctor' %}
+                        <div class="col-md-3">
+                            <a href="{{ url_for('doctor.appointments') }}" class="btn btn-outline-info w-100 p-3">
+                                <i class="fas fa-calendar-day mb-2 fa-2x"></i>
+                                <div>Today's Appointments</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('doctor.prescriptions') }}" class="btn btn-outline-warning w-100 p-3">
+                                <i class="fas fa-prescription mb-2 fa-2x"></i>
+                                <div>Prescriptions</div>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role == 'pharmacist' %}
+                        <div class="col-md-3">
+                            <a href="{{ url_for('pharmacy.medications') }}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="fas fa-pills mb-2 fa-2x"></i>
+                                <div>Manage Medications</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('pharmacy.prescriptions') }}" class="btn btn-outline-success w-100 p-3">
+                                <i class="fas fa-prescription-bottle-alt mb-2 fa-2x"></i>
+                                <div>View Prescriptions</div>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role == 'lab_technician' %}
+                        <div class="col-md-3">
+                            <a href="{{ url_for('laboratory.tests') }}" class="btn btn-outline-info w-100 p-3">
+                                <i class="fas fa-vial mb-2 fa-2x"></i>
+                                <div>Manage Lab Tests</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('laboratory.results') }}" class="btn btn-outline-warning w-100 p-3">
+                                <i class="fas fa-file-medical-alt mb-2 fa-2x"></i>
+                                <div>Test Results</div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Activities</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush activities-list">
+                        {% for activity in recent_activities %}
+                        <div class="list-group-item" data-bs-toggle="tooltip" title="{{ activity.time }}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ activity.title }}</h6>
+                                <small class="text-muted">{{ activity.time }}</small>
+                            </div>
+                            <p class="mb-1">{{ activity.description }}</p>
+                            <small class="text-muted">{{ activity.user }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Upcoming Events</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View Calendar</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush events-list">
+                        {% for event in upcoming_events %}
+                        <div class="list-group-item" data-bs-toggle="tooltip" title="{{ event.date }} {{ event.time }}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <small class="text-muted">{{ event.date }}</small>
+                            </div>
+                            <p class="mb-1">{{ event.description }}</p>
+                            <small class="text-primary">{{ event.time }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options);
+    }
+
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Refresh dashboard data periodically
+    function refreshDashboard() {
+        fetch('{{ url_for("main.dashboard_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Update statistics
+                Object.keys(data.stats).forEach(key => {
+                    const element = document.getElementById(`stat-${key}`);
+                    if (element) {
+                        element.textContent = data.stats[key];
+                    }
+                });
+
+                // Update activities list
+                const activitiesList = document.querySelector('.activities-list');
+                if (activitiesList && data.activities) {
+                    activitiesList.innerHTML = data.activities.map(activity => `
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${activity.title}</h6>
+                                <small class="text-muted">${activity.time}</small>
+                            </div>
+                            <p class="mb-1">${activity.description}</p>
+                            <small class="text-muted">${activity.user}</small>
+                        </div>
+                    `).join('');
+                }
+
+                // Update events list
+                const eventsList = document.querySelector('.events-list');
+                if (eventsList && data.events) {
+                    eventsList.innerHTML = data.events.map(event => `
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${event.title}</h6>
+                                <small class="text-muted">${event.date}</small>
+                            </div>
+                            <p class="mb-1">${event.description}</p>
+                            <small class="text-primary">${event.time}</small>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(error => console.error('Error refreshing dashboard:', error));
+    }
+
+    // Refresh every 30 seconds
+    refreshDashboard(); // Initial load
+    setInterval(refreshDashboard, 30000);
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+{% endblock %}

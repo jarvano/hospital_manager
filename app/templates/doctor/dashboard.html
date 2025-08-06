@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h2 class="mb-1">Welcome, Dr. {{ current_user.first_name }}!</h2>
+                            <p class="mb-0">{{ current_user.department }} Department</p>
+                        </div>
+                        <div class="ms-auto">
+                            <i class="fas fa-user-md fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Today's Appointments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="stats-today-appointments">{{ stats.today_appointments }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-success bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Patients Seen</h6>
+                            <h2 class="mb-0" id="stat-patients">{{ stats.patients_seen }}</h2>
+                            <small>This week</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-info bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Prescriptions</h6>
+                            <h2 class="mb-0" id="stat-prescriptions">{{ stats.prescriptions_today }}</h2>
+                            <small>Today</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-prescription fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card bg-warning bg-gradient text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2">Lab Tests</h6>
+                            <h2 class="mb-0" id="stat-tests">{{ stats.pending_lab_tests }}</h2>
+                            <small>Pending results</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-flask fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Schedule -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Today's Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in today_appointments %}
+                                <tr>
+                                    <td>{{ appointment.time }}</td>
+                                    <td>
+                                        <div>{{ appointment.patient_name }}</div>
+                                        <small class="text-muted">ID: {{ appointment.patient_id }}</small>
+                                    </td>
+                                    <td>{{ appointment.type }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ appointment.status_color }}">{{ appointment.status }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('doctor.view_appointment', id=appointment.id) }}" 
+                                           class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('doctor.start_consultation', id=appointment.id) }}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-stethoscope"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3">No appointments scheduled for today</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Prescriptions -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Prescriptions</h5>
+                    <a href="{{ url_for('doctor.prescriptions') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for prescription in recent_prescriptions %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ prescription.patient.first_name }} {{ prescription.patient.last_name }}</h6>
+                                <small>{{ prescription.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ prescription.diagnosis[:100] }}...</p>
+                        </a>
+                        {% else %}
+                        <div class="text-center py-3">No recent prescriptions.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Lab Results -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Lab Results</h5>
+                    <a href="{{ url_for('doctor.lab_results') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for test in recent_lab_results %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ test.patient.first_name }} {{ test.patient.last_name }} - {{ test.test_type }}</h6>
+                                <small>{{ test.updated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ test.results[:100] }}...</p>
+                        </a>
+                        {% else %}
+                        <div class="text-center py-3">No recent lab results.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function refreshDashboard() {
+        fetch('{{ url_for("doctor.dashboard_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Update statistics
+                document.getElementById('stats-today-appointments').textContent = data.stats.today_appointments;
+                document.getElementById('stat-patients').textContent = data.stats.patients_seen;
+                document.getElementById('stat-prescriptions').textContent = data.stats.prescriptions_today;
+                document.getElementById('stat-tests').textContent = data.stats.pending_lab_tests;
+
+                // Update appointments table
+                const tbody = document.querySelector('#appointments-table tbody');
+                if (data.today_appointments.length > 0) {
+                    tbody.innerHTML = data.today_appointments.map(apt => `
+                        <tr>
+                            <td>${apt.time}</td>
+                            <td>
+                                <div>${apt.patient_name}</div>
+                                <small class="text-muted">ID: ${apt.patient_id}</small>
+                            </td>
+                            <td>${apt.type}</td>
+                            <td>
+                                <span class="badge bg-${apt.status_color}">${apt.status}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('doctor.view_appointment', id='${apt.id}') }}" 
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('doctor.start_consultation', id='${apt.id}') }}" 
+                                   class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-stethoscope"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3">No appointments scheduled for today</td></tr>';
+                }
+            })
+            .catch(error => console.error('Error refreshing dashboard:', error));
+    }
+
+    // Initial load
+    refreshDashboard();
+
+    // Refresh every 30 seconds
+    setInterval(refreshDashboard, 30000);
+</script>
+{% endblock %}
